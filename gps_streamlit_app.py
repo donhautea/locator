@@ -1,45 +1,49 @@
-# gps_streamlit_app.py
+# gps_location_app.py
 
 import streamlit as st
 from streamlit_js_eval import streamlit_js_eval
 import pandas as pd
 
-# Page config
-st.set_page_config(page_title="User Location App", layout="wide")
-st.title("📍 Real-Time User Location Tracker")
+# Page Configuration
+st.set_page_config(page_title="User GPS Locator", layout="wide")
 
-# Sidebar info
+# Title and Sidebar
+st.title("📍 Real-Time GPS Location Tracker")
 with st.sidebar:
-    st.header("📌 App Info")
+    st.header("🌐 Instructions")
     st.markdown("""
-    - This app retrieves your current GPS coordinates.
-    - It uses your browser's location permission.
-    - Location is visualized on the map.
+    - Make sure to **allow location access** when prompted by your browser.
+    - This app will fetch your **current coordinates** and show your **location on a map**.
+    - Works best on Chrome, Edge, or Safari with location enabled.
     """)
 
-# Get location using JS eval (via browser)
-location = streamlit_js_eval(js_expressions="navigator.geolocation.getCurrentPosition", key="get_location", timeout=30)
+# Fetch current location using JS API
+location = streamlit_js_eval(
+    js_expressions="navigator.geolocation.getCurrentPosition",
+    key="get_location"
+)
 
+# Process and Display Location
 if location and isinstance(location, dict) and "coords" in location:
     lat = location["coords"]["latitude"]
     lon = location["coords"]["longitude"]
-    
-    st.success("📍 Location retrieved successfully!")
-    
+
+    st.success("✅ Location retrieved successfully!")
+
+    # Show coordinates
     col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Latitude", f"{lat:.6f}")
-    with col2:
-        st.metric("Longitude", f"{lon:.6f}")
+    col1.metric("Latitude", f"{lat:.6f}")
+    col2.metric("Longitude", f"{lon:.6f}")
 
-    # Show location on map
-    st.subheader("🗺️ Current Location on Map")
-    location_df = pd.DataFrame([[lat, lon]], columns=["lat", "lon"])
-    st.map(location_df)
+    # Show on map
+    st.subheader("🗺️ Your Location on Map")
+    df = pd.DataFrame([[lat, lon]], columns=["lat", "lon"])
+    st.map(df)
 
-    # Button to simulate sending to server
-    if st.button("🚀 Send Coordinates to Server"):
-        # Simulate server send (you can replace this with actual backend call)
+    # Simulate sending to server
+    if st.button("📤 Send Coordinates to Server"):
         st.success(f"Coordinates sent: ({lat:.6f}, {lon:.6f})")
+
 else:
-    st.warning("⚠️ Please allow location access in your browser.")
+    st.warning("⚠️ Please allow location access in your browser settings.")
+    st.info("📌 If you blocked it, reset permissions and reload this page.")
